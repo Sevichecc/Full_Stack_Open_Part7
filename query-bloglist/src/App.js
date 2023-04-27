@@ -7,14 +7,14 @@ import Togglable from './components/Togglable'
 
 import blogService from './services/blogs'
 import loginService from './services/login'
-
+import { useNotify } from './context/NotificationContext'
 const App = () => {
+  const dispatch = useNotify()
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
-  const [info, setInfo] = useState({ message: null })
   const blogFormRef = useRef(null)
 
   useEffect(() => {
@@ -30,16 +30,6 @@ const App = () => {
     }
   }, [])
 
-  const notifyWith = (message, type = 'info') => {
-    setInfo({
-      message,
-      type,
-    })
-    setTimeout(() => {
-      setInfo({ message: null })
-    }, 3000)
-  }
-
   const handleLogin = async (event) => {
     event.preventDefault()
 
@@ -52,7 +42,11 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (error) {
-      notifyWith('Wrong username or password', 'error')
+      dispatch({
+        type: 'SET',
+        message: 'Wrong username or password',
+        status: 'error',
+      })
     }
   }
 
@@ -67,9 +61,17 @@ const App = () => {
       const newBlog = await blogService.create(blogObject)
       setBlogs(blogs.concat(newBlog))
       blogFormRef.current.toggleVisbility()
-      notifyWith(`a new blog ${newBlog.title} by ${newBlog.author}`)
+      dispatch({
+        type: 'SET',
+        message: `a new blog ${newBlog.title} by ${newBlog.author}`,
+        status: 'success',
+      })
     } catch (error) {
-      notifyWith(error.message)
+      dispatch({
+        type: 'SET',
+        message: error.message,
+        status: 'error',
+      })
     }
   }
 
@@ -81,7 +83,11 @@ const App = () => {
       )
       setBlogs(updatedBlogs)
     } catch (error) {
-      notifyWith(error.message)
+      dispatch({
+        type: 'SET',
+        message: error.message,
+        status: 'error',
+      })
     }
   }
 
@@ -97,7 +103,11 @@ const App = () => {
       const updatedBlog = blogs.filter((blog) => blog.id !== blogObject.id)
       setBlogs(updatedBlog)
     } catch (error) {
-      notifyWith(error.message)
+      dispatch({
+        type: 'SET',
+        message: error.message,
+        status: 'error',
+      })
     }
   }
 
@@ -109,7 +119,6 @@ const App = () => {
         handlePassword={({ target }) => setPassword(target.value)}
         username={username}
         password={password}
-        info={info}
       />
     )
   }
@@ -117,7 +126,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification info={info} />
+      <Notification />
       <span>{user.username} logged in </span>
       <button onClick={handleLogout}>logout</button>
       <Togglable buttonLabel='create new blog' ref={blogFormRef}>

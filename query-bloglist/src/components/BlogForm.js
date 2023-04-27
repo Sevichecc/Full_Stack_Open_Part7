@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useNotify } from '../context/NotificationContext'
 
 const BlogForm = ({ createBlog }) => {
+  const dispatch = useNotify()
   const [blogTitle, setBlogTitle] = useState('')
   const [blogAuthor, setBlogAuthor] = useState('')
   const [blogUrl, setBlogUrl] = useState('')
@@ -11,6 +13,11 @@ const BlogForm = ({ createBlog }) => {
       title: blogTitle,
       author: blogAuthor,
       url: blogUrl,
+    })
+    dispatch({
+      type: 'SET',
+      message: `${blogTitle} created!`,
+      status: 'success',
     })
     setBlogTitle('')
     setBlogAuthor('')
@@ -51,7 +58,9 @@ const BlogForm = ({ createBlog }) => {
             id='blogurl'
           />
         </div>
-        <button type='submit' id='create'>create</button>
+        <button type='submit' id='create'>
+          create
+        </button>
       </form>
     </div>
   )

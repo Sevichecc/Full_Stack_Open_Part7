@@ -1,14 +1,14 @@
-const Notification = ({ info }) => {
-  if (!info.message) {
-    return null
-  }
+import { useNotificationValue } from '../context/NotificationContext'
+
+const Notification = () => {
+  const notification = useNotificationValue()
 
   return (
-    <div
-      className={`info ${info.type === 'error' ? 'error' : 'success'}`}
-    >
-      <p>{info.message}</p>
-    </div>
+    notification && (
+      <div className={`info ${notification.status}`}>
+        <p>{notification.message}</p>
+      </div>
+    )
   )
 }
 

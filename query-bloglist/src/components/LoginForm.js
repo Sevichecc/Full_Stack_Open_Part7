@@ -1,4 +1,3 @@
-import Notification from './Notification'
 import PropTypes from 'prop-types'
 
 const LoginForm = ({
@@ -7,12 +6,10 @@ const LoginForm = ({
   handlePassword,
   password,
   username,
-  info
 }) => {
   return (
     <div>
       <h2>log in to application</h2>
-      <Notification info={info} />
       <form onSubmit={handleLogin}>
         <div>
           username:
@@ -48,7 +45,7 @@ LoginForm.PropTyps = {
   handlePassword: PropTypes.func.isRequired,
   password: PropTypes.string.isRequired,
   username: PropTypes.string.isRequired,
-  info: PropTypes.string.isRequired
+  info: PropTypes.string.isRequired,
 }
 
 export default LoginForm
