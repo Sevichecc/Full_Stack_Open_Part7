@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import BlogForm from './components/BlogForm'
@@ -21,7 +21,6 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
-  const blogFormRef = useRef(null)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -76,7 +75,7 @@ const App = () => {
       <Notification />
       <span>{user.username} logged in </span>
       <button onClick={handleLogout}>logout</button>
-      <Togglable buttonLabel='create new blog' ref={blogFormRef}>
+      <Togglable buttonLabel='create new blog'>
         <BlogForm />
       </Togglable>
       {blogs &&

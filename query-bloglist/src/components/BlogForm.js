@@ -1,15 +1,22 @@
 import { useState } from 'react'
 import { useNotify } from '../context/NotificationContext'
+import { useMutation, useQueryClient } from 'react-query'
+import blogService from '../services/blogs'
 
-const BlogForm = ({ createBlog }) => {
+const BlogForm = () => {
   const dispatch = useNotify()
+  const queryClient = useQueryClient()
+  const newBlogMutation = useMutation(blogService.create, {
+    onSuccess: () => queryClient.invalidateQueries('blogs'),
+    onError: (error) => dispatch({ type: 'SET', message: error.response.data.message })
+  })
   const [blogTitle, setBlogTitle] = useState('')
   const [blogAuthor, setBlogAuthor] = useState('')
   const [blogUrl, setBlogUrl] = useState('')
 
   const addBlog = async (event) => {
     event.preventDefault()
-    createBlog({
+    newBlogMutation.mutate({
       title: blogTitle,
       author: blogAuthor,
       url: blogUrl,
