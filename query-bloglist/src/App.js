@@ -10,25 +10,27 @@ import { useNotify } from './context/NotificationContext'
 
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import blogService from './services/blogs'
+import { useUserValue, useUserDispatch } from './context/UserContext'
 
 const App = () => {
   const dispatch = useNotify()
   const queryClient = useQueryClient()
-  const results = useQuery('blogs', blogService.getAll, {
+  const blogResults = useQuery('blogs', blogService.getAll, {
     refetchOnWindowFocus: false,
   })
-
-  const blogs = results.data
+  const blogs = blogResults.data
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
+
+  const user = useUserValue()
+  const userDispatch = useUserDispatch()
 
   useEffect(() => {
     const loggedUserJson = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJson) {
       const user = JSON.parse(loggedUserJson)
-      setUser(user)
+      userDispatch({ type: 'SET', payload: user })
       blogService.setToken(user.token)
     }
   }, [])
@@ -41,7 +43,7 @@ const App = () => {
 
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
       blogService.setToken(user.token)
-      setUser(user)
+      userDispatch({ type: 'SET', payload: user })
       setUsername('')
       setPassword('')
     } catch (error) {
@@ -56,9 +58,8 @@ const App = () => {
   const handleLogout = (event) => {
     event.preventDefault()
     window.localStorage.removeItem('loggedBlogappUser')
-    setUser(null)
+    userDispatch({ type: 'REMOVE' })
   }
-
   const updatedBlogAndMutation = useMutation(blogService.addLike, {
     onSuccess: () => queryClient.invalidateQueries('blogs'),
   })
@@ -73,7 +74,6 @@ const App = () => {
   const handleRemove = (blog) => {
     if (!window.confirm(`Remove blog ${blog.title}! by Ron ${blog.author}`))
       return
-    console.log(blog)
     removeBlogMutation.mutate(blog)
   }
 
