@@ -3,7 +3,10 @@ import notificationReducer from './reducer/notificationReducer'
 import blogReducer from './reducer/blogReducer'
 
 const store = configureStore({
-  reducer: { notificationReducer, blogReducer },
+  reducer: {
+    notification: notificationReducer,
+    blogs: blogReducer,
+  },
 })
 
 export default store

@@ -7,12 +7,16 @@ import Togglable from './components/Togglable'
 
 import blogService from './services/blogs'
 import loginService from './services/login'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { updateNotification } from './reducer/notificationReducer'
-import { initializeBlogs } from './reducer/blogReducer'
+import {
+  initializeBlogs,
+  incrementLike,
+  deleteBlog,
+} from './reducer/blogReducer'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
+  const blogs = useSelector((state) => state.blogs)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
@@ -55,48 +59,9 @@ const App = () => {
     setUser(null)
   }
 
-  // const addBlog = async (blogObject) => {
-  //   try {
-  //     const newBlog = await blogService.create(blogObject)
-  //     setBlogs(blogs.concat(newBlog))
-  //     blogFormRef.current.toggleVisbility()
-  //     dispatch(
-  //       updateNotification(
-  //         `a new blog ${newBlog.title} by ${newBlog.author}`,
-  //         'success',
-  //         5
-  //       )
-  //     )
-  //   } catch (error) {
-  //     dispatch(updateNotification(error.message, 'error', 5))
-  //   }
-  // }
-
-  const addLike = async (blogObject) => {
-    try {
-      const response = await blogService.addLike(blogObject)
-      const updatedBlogs = blogs.map((blog) =>
-        blog.id === response.id ? response : blog
-      )
-      setBlogs(updatedBlogs)
-    } catch (error) {
-      dispatch(updateNotification(error.message, 'error', 5))
-    }
-  }
-
-  const removeBlog = async (blogObject) => {
-    try {
-      if (
-        !window.confirm(
-          `Remove blog ${blogObject.title}! by Ron ${blogObject.author}`
-        )
-      )
-        return
-      await blogService.remove(blogObject)
-      const updatedBlog = blogs.filter((blog) => blog.id !== blogObject.id)
-      setBlogs(updatedBlog)
-    } catch (error) {
-      dispatch(updateNotification(error.message, 'error', 5))
+  const handleRemoveBlog = async (blog) => {
+    if (window.confirm(`Remove blog ${blog.title}! by Ron ${blog.author}`)) {
+      dispatch(deleteBlog(blog))
     }
   }
 
@@ -121,17 +86,20 @@ const App = () => {
       <Togglable buttonLabel='create new blog' ref={blogFormRef}>
         <BlogForm />
       </Togglable>
-      {blogs
-        .sort((a, b) => b.likes - a.likes)
-        .map((blog) => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            handleLike={addLike}
-            handleRemove={removeBlog}
-            canRemove={user && blog.user.username === user.username}
-          />
-        ))}
+      {blogs &&
+        [...blogs]
+          .sort((a, b) => b.likes - a.likes)
+          .map((blog) => (
+            <Blog
+              key={blog.id}
+              blog={blog}
+              handleLike={() => {
+                return dispatch(incrementLike(blog))
+              }}
+              handleRemove={handleRemoveBlog}
+              canRemove={user && blog.user.username === user.username}
+            />
+          ))}
     </div>
   )
 }

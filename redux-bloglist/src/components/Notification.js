@@ -1,14 +1,11 @@
 import { useSelector } from 'react-redux'
 const Notification = () => {
-  const notification = useSelector((state) => state)
+  const notification = useSelector((state) => state.notification)
 
+  console.log(notification)
   return (
-    notification.info && (
-      <div
-        className={`info ${
-          notification.status === 'error' ? 'error' : 'success'
-        }`}
-      >
+    notification && (
+      <div className={`info ${notification.status}`}>
         <p>{notification.info}</p>
       </div>
     )

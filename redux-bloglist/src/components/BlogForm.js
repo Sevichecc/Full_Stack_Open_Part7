@@ -15,12 +15,13 @@ const BlogForm = () => {
       title: blogTitle,
       author: blogAuthor,
       url: blogUrl,
+      likes: 0,
     }
+    dispatch(createBlog(blogInfo))
+    dispatch(updateNotification(`${blogTitle} created!`, 'success', 5))
+    setBlogUrl('')
     setBlogTitle('')
     setBlogAuthor('')
-    setBlogUrl('')
-    dispatch(createBlog(blogInfo))
-    dispatch(updateNotification(`${blogInfo.title} created!`, 'success', 5))
   }
 
   return (
