@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useUserValue, useUserDispatch } from './context/UserContext'
+import { Routes, Route, useMatch } from 'react-router-dom'
 
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
-
-import UserBlogs from './components/UserBlogs'
+import UsersBlogList from './components/UsersBlogList'
+import UserBlog from './components/UserBlog'
 import BlogList from './components/BlogList'
 
 import { login } from './services/login'
 import blogService from './services/blogs'
 
 import { useNotify } from './context/NotificationContext'
-
-
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { useQuery } from 'react-query'
+import { getUsers } from './services/user'
 
 const App = () => {
   const dispatch = useNotify()
@@ -21,25 +21,38 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
-  const user = useUserValue()
+  const loginUser = useUserValue()
   const userDispatch = useUserDispatch()
+
+  const userResult = useQuery('users', getUsers, {
+    refetchOnWindowFocus: false,
+  })
+  const users = userResult.data
+  const match = useMatch('/users/:id')
+  const user = users && match
+    ? users.find((user) => user.id === match.params.id)
+    : null
 
   useEffect(() => {
     const loggedUserJson = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJson) {
-      const user = JSON.parse(loggedUserJson)
-      userDispatch({ type: 'SET', payload: user })
-      blogService.setToken(user.token)
+      const loginUser = JSON.parse(loggedUserJson)
+      userDispatch({ type: 'SET', payload: loginUser })
+      blogService.setToken(loginUser.token)
     }
-  }, [])
+  }, [userDispatch])
 
-  const handleLogin = async () => {
+  const handleLogin = async (event) => {
+    event.preventDefault()
     try {
-      const user = await login({ username, password })
+      const loginUser = await login({ username, password })
 
-      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
-      blogService.setToken(user.token)
-      userDispatch({ type: 'SET', payload: user })
+      window.localStorage.setItem(
+        'loggedBlogappUser',
+        JSON.stringify(loginUser)
+      )
+      blogService.setToken(loginUser.token)
+      userDispatch({ type: 'SET', payload: loginUser })
       setUsername('')
       setPassword('')
     } catch (error) {
@@ -57,8 +70,7 @@ const App = () => {
     userDispatch({ type: 'REMOVE' })
   }
 
-
-  if (!user) {
+  if (!loginUser) {
     return (
       <LoginForm
         handleLogin={handleLogin}
@@ -71,16 +83,17 @@ const App = () => {
   }
 
   return (
-    <Router>
+    <>
       <h2>blogs</h2>
       <Notification />
-      <p>{user.username} logged in </p>
+      <p>{loginUser.username} logged in </p>
       <button onClick={handleLogout}>logout</button>
       <Routes>
-        <Route path='/users' element={<UserBlogs />} />
         <Route path='/' element={<BlogList />} />
+        <Route path='/users' element={<UsersBlogList users={users} />} />
+        <Route path='/users/:id' element={<UserBlog user={user} />} />
       </Routes>
-    </Router>
+    </>
   )
 }
 

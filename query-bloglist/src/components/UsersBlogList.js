@@ -1,12 +1,6 @@
-import { useQuery } from 'react-query'
-import { getUsers } from '../services/user'
+import { Link } from 'react-router-dom'
 
-const UserBlogs = () => {
-  const result = useQuery('users', getUsers, {
-    refetchOnWindowFocus: false,
-  })
-
-  const users = result.data
+const UserBlogs = ({ users }) => {
   return (
     <div>
       <h2>User</h2>
@@ -21,7 +15,9 @@ const UserBlogs = () => {
           {users &&
             users.map((user) => (
               <tr key={user.id}>
-                <td>{user.username}</td>
+                <td>
+                  <Link to={`/users/${user.id}`}>{user.username}</Link>
+                </td>
                 <td>{user.blogs.length}</td>
               </tr>
             ))}
