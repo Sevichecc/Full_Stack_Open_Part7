@@ -21,3 +21,8 @@
 .error {
   color: red;
 }
+
+.menu {
+  display: flex;
+  gap: 4px;
+}

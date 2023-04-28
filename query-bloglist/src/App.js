@@ -8,6 +8,7 @@ import UsersBlogList from './components/UsersBlogList'
 import UserBlog from './components/UserBlog'
 import BlogList from './components/BlogList'
 import BlogDetail from './components/BlogDetail'
+import Menu from './components/Menu'
 
 import { login } from './services/login'
 import blogService from './services/blogs'
@@ -99,10 +100,9 @@ const App = () => {
     <>
       <h2>blogs</h2>
       <Notification />
-      <p>{loginUser.username} logged in </p>
-      <button onClick={handleLogout}>logout</button>
+      <Menu loginUser={loginUser} handleLogout={handleLogout} />
       <Routes>
-        <Route path='/' element={<BlogList blogs={blogs}/>} />
+        <Route path='/' element={<BlogList blogs={blogs} />} />
         <Route path='/users' element={<UsersBlogList users={users} />} />
         <Route path='/users/:id' element={<UserBlog user={user} />} />
         <Route path='/blogs/:id' element={<BlogDetail blog={blog} />} />
