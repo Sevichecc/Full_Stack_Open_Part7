@@ -1,5 +1,5 @@
 import React from 'react'
-import { useQueryClient, useQuery, useMutation } from 'react-query'
+import { useQueryClient,useMutation } from 'react-query'
 import { useUserValue } from '../context/UserContext'
 
 import blogService from '../services/blogs'
@@ -7,13 +7,9 @@ import Blog from './Blog'
 import BlogForm from './BlogForm'
 import Togglable from './Togglable'
 
-const BlogList = () => {
+const BlogList = ({ blogs }) => {
   const user = useUserValue()
   const queryClient = useQueryClient()
-  const results = useQuery('blogs', blogService.getAll, {
-    refetchOnWindowFocus: false,
-  })
-  const blogs = results.data
 
   const updatedBlogAndMutation = useMutation(blogService.addLike, {
     onSuccess: () => queryClient.invalidateQueries('blogs'),

@@ -7,6 +7,7 @@ import LoginForm from './components/LoginForm'
 import UsersBlogList from './components/UsersBlogList'
 import UserBlog from './components/UserBlog'
 import BlogList from './components/BlogList'
+import BlogDetail from './components/BlogDetail'
 
 import { login } from './services/login'
 import blogService from './services/blogs'
@@ -24,14 +25,26 @@ const App = () => {
   const loginUser = useUserValue()
   const userDispatch = useUserDispatch()
 
+  // user query
   const userResult = useQuery('users', getUsers, {
     refetchOnWindowFocus: false,
   })
   const users = userResult.data
-  const match = useMatch('/users/:id')
-  const user = users && match
-    ? users.find((user) => user.id === match.params.id)
-    : null
+  const userMatch = useMatch('/users/:id')
+  const user =
+    users && userMatch
+      ? users.find((user) => user.id === userMatch.params.id)
+      : null
+
+  const blogsResult = useQuery('blogs', blogService.getAll, {
+    refetchOnWindowFocus: false,
+  })
+  const blogs = blogsResult.data
+  const blogMatch = useMatch('/blogs/:id')
+  const blog =
+    blogs && blogMatch
+      ? blogs.find((blog) => blog.id === blogMatch.params.id)
+      : null
 
   useEffect(() => {
     const loggedUserJson = window.localStorage.getItem('loggedBlogappUser')
@@ -89,9 +102,10 @@ const App = () => {
       <p>{loginUser.username} logged in </p>
       <button onClick={handleLogout}>logout</button>
       <Routes>
-        <Route path='/' element={<BlogList />} />
+        <Route path='/' element={<BlogList blogs={blogs}/>} />
         <Route path='/users' element={<UsersBlogList users={users} />} />
         <Route path='/users/:id' element={<UserBlog user={user} />} />
+        <Route path='/blogs/:id' element={<BlogDetail blog={blog} />} />
       </Routes>
     </>
   )
