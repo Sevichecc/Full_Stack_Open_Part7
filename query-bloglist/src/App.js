@@ -1,24 +1,22 @@
 import { useState, useEffect } from 'react'
-import Blog from './components/Blog'
-import Notification from './components/Notification'
-import BlogForm from './components/BlogForm'
-import LoginForm from './components/LoginForm'
-import Togglable from './components/Togglable'
+import { useUserValue, useUserDispatch } from './context/UserContext'
 
-import loginService from './services/login'
+import Notification from './components/Notification'
+import LoginForm from './components/LoginForm'
+
+import UserBlogs from './components/UserBlogs'
+import BlogList from './components/BlogList'
+
+import { login } from './services/login'
+import blogService from './services/blogs'
+
 import { useNotify } from './context/NotificationContext'
 
-import { useQuery, useMutation, useQueryClient } from 'react-query'
-import blogService from './services/blogs'
-import { useUserValue, useUserDispatch } from './context/UserContext'
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 const App = () => {
   const dispatch = useNotify()
-  const queryClient = useQueryClient()
-  const blogResults = useQuery('blogs', blogService.getAll, {
-    refetchOnWindowFocus: false,
-  })
-  const blogs = blogResults.data
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -35,11 +33,9 @@ const App = () => {
     }
   }, [])
 
-  const handleLogin = async (event) => {
-    event.preventDefault()
-
+  const handleLogin = async () => {
     try {
-      const user = await loginService.login({ username, password })
+      const user = await login({ username, password })
 
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
       blogService.setToken(user.token)
@@ -60,22 +56,7 @@ const App = () => {
     window.localStorage.removeItem('loggedBlogappUser')
     userDispatch({ type: 'REMOVE' })
   }
-  const updatedBlogAndMutation = useMutation(blogService.addLike, {
-    onSuccess: () => queryClient.invalidateQueries('blogs'),
-  })
 
-  const handleLike = (blog) => {
-    updatedBlogAndMutation.mutate(blog)
-  }
-  const removeBlogMutation = useMutation(blogService.remove, {
-    onSuccess: () => queryClient.invalidateQueries('blogs'),
-  })
-
-  const handleRemove = (blog) => {
-    if (!window.confirm(`Remove blog ${blog.title}! by Ron ${blog.author}`))
-      return
-    removeBlogMutation.mutate(blog)
-  }
 
   if (!user) {
     return (
@@ -90,27 +71,16 @@ const App = () => {
   }
 
   return (
-    <div>
+    <Router>
       <h2>blogs</h2>
       <Notification />
-      <span>{user.username} logged in </span>
+      <p>{user.username} logged in </p>
       <button onClick={handleLogout}>logout</button>
-      <Togglable buttonLabel='create new blog'>
-        <BlogForm />
-      </Togglable>
-      {blogs &&
-        blogs
-          .sort((a, b) => b.likes - a.likes)
-          .map((blog) => (
-            <Blog
-              key={blog.id}
-              blog={blog}
-              handleLike={handleLike}
-              handleRemove={handleRemove}
-              canRemove={user && blog.user.username === user.username}
-            />
-          ))}
-    </div>
+      <Routes>
+        <Route path='/users' element={<UserBlogs />} />
+        <Route path='/' element={<BlogList />} />
+      </Routes>
+    </Router>
   )
 }
 

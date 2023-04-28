@@ -31,4 +31,5 @@ export const useUserDispatch = () => {
   const userAndDispatch = useContext(UserContext)
   return userAndDispatch[1]
 }
+
 export default UserContext
